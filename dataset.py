@@ -5,8 +5,10 @@ from torch.utils.data import DataLoader
 from torch.utils.data import sampler
 import torchvision.datasets as dset
 from torchvision import transforms
-import torchvision.transforms as T
+import matplotlib.pyplot as plt
 import numpy as np
+
+
 
 import os
 from augmentation import RandomCrop, ToTensor
@@ -15,7 +17,6 @@ from fcn_utils import show_batch, show_dataset
 
 
 from PIL import Image
-from skimage import io
 
 class PascalVOC(Dataset):
 
@@ -53,10 +54,10 @@ class PascalVOC(Dataset):
 			print(img_label_path + ' does not exist!')
 			return None
 
-		image = io.imread(img_path)
-		label = io.imread(img_label_path)
-
+		image = Image.open(img_path)
+		label = Image.open(img_label_path)
 		sample = {'image': image, 'label': label}
+		
 		if self.transforms:
 			sample = self.transforms(sample)
 
@@ -67,21 +68,17 @@ class PascalVOC(Dataset):
 
 
 if __name__ == '__main__':
-	#train_dataset = PascalVOC(transforms=ToTensor())
-	#print(len(train_dataset))
-	
-	#show_dataset(train_dataset, 5)
+	train_dataset = PascalVOC(transforms=transforms.Compose([RandomCrop(250), ToTensor()]))
+	# from fcn_utils import show_map
+	# print(len(train_dataset))
+	# for i in range(1225, 1230):
+	# 	sample = train_dataset[i]
+	# 	show_map(sample)
+	# 	plt.show()
 
-	train_dataset = PascalVOC(names_file='./VOCdevkit/VOC2012/ImageSets/Segmentation/val.txt',
-									transforms=transforms.Compose([
-											RandomCrop(200),
-											ToTensor()
-									]))
-	train_loader = DataLoader(train_dataset,
-							  batch_size=4,
-							  shuffle=True,
-							  num_workers=1)
+	train_dataloader = DataLoader(train_dataset, batch_size=4)
+	show_batch(train_dataloader, 4)
 
-	show_batch(train_loader, 5)
+
 
 
